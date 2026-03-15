@@ -263,8 +263,8 @@ These features are planned and actively being worked on:
 
 **Rahul Kushwaha**
 
-- GitHub: [@yourusername](https://github.com/theRahulkushwaha)
-- LinkedIn: [your-linkedin](https://linkedin.com/in/rahulkushwaha16)
+- GitHub: [@theRahulkushwaha](https://github.com/theRahulkushwaha)
+- LinkedIn: [rahulkushwaha16](https://linkedin.com/in/rahulkushwaha16)
 
 ---
 
