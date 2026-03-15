@@ -1,22 +1,20 @@
 import Avatar from "@/components/Avatar";
 import BackButton from "@/components/BackButton";
+import Button from "@/components/Button";
 import Header from "@/components/Header";
 import Input from "@/components/Input";
-// import Loading from "@/components/Loading";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
-import { verticalScale } from "@/Utils/styling";
-// import { Button } from "@react-navigation/elements";
-import Button from "@/components/Button";
+import { getAvatarPath, uploadFileToCloudinary } from "@/services/imageService";
 import { updateProfile } from "@/socket/socketEvents";
 import { UserDataProps } from "@/types";
+import { verticalScale } from "@/Utils/styling";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import * as Icons from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
-
 import {
   Alert,
   Platform,
@@ -37,9 +35,7 @@ const ProfileModal = () => {
     avatar: null,
   });
 
-  /**
-   * Register socket listener
-   */
+  /** Register socket listener */
   useEffect(() => {
     updateProfile(processUpdateProfile);
 
@@ -48,13 +44,9 @@ const ProfileModal = () => {
     };
   }, []);
 
-  /**
-   * Handle server response
-   */
+  /** Handle server response */
   const processUpdateProfile = (res: any) => {
-    console.log("got res:", res);
     setLoading(false);
-
     if (res.success) {
       updateToken(res.data.token);
       router.back();
@@ -63,9 +55,7 @@ const ProfileModal = () => {
     }
   };
 
-  /**
-   * Sync user data from context
-   */
+  /** Sync user data from context */
   useEffect(() => {
     setUserData({
       name: user?.name || "",
@@ -74,24 +64,21 @@ const ProfileModal = () => {
     });
   }, [user]);
 
+  /** Pick image from gallery */
   const onPickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      // allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
     });
 
-    console.log(result);
-
-    if (!result.canceled) {
+    if (!result.canceled && result.assets.length > 0) {
       setUserData({ ...userData, avatar: result.assets[0] });
     }
   };
 
-  /**
-   * Logout
-   */
+  /** Logout */
   const handleLogout = async () => {
     router.back();
     await signOut();
@@ -108,10 +95,8 @@ const ProfileModal = () => {
     ]);
   };
 
-  /**
-   * Submit Update
-   */
-  const onSubmit = () => {
+  /** Submit update */
+  const onSubmit = async () => {
     const { name, avatar } = userData;
 
     if (!name.trim()) {
@@ -121,9 +106,26 @@ const ProfileModal = () => {
 
     setLoading(true);
 
+    let avatarUrl: string | undefined = undefined;
+
+    // Upload avatar if it's a local file
+    if (avatar && typeof avatar === "object" && avatar.uri) {
+      const res = await uploadFileToCloudinary(avatar, "profiles");
+      if (res.success) {
+        avatarUrl = res.data;
+      } else {
+        Alert.alert("User", res.msg || "Could not upload avatar");
+        setLoading(false);
+        return;
+      }
+    } else if (typeof avatar === "string") {
+      avatarUrl = avatar;
+    }
+
+    // Send updated profile via socket
     updateProfile({
       name: name.trim(),
-      avatar,
+      avatar: avatarUrl,
     });
   };
 
@@ -140,7 +142,7 @@ const ProfileModal = () => {
 
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.avatarContainer}>
-            <Avatar uri={userData.avatar} size={170} />
+            <Avatar uri={getAvatarPath(userData.avatar)} size={170} />
 
             <TouchableOpacity style={styles.editIcon} onPress={onPickImage}>
               <Icons.Pencil
@@ -219,7 +221,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: spacingY._20,
-    // paddingVertical: spacingY._30,
   },
 
   footer: {
@@ -242,16 +243,6 @@ const styles = StyleSheet.create({
   avatarContainer: {
     position: "relative",
     alignSelf: "center",
-  },
-
-  avatar: {
-    alignSelf: "center",
-    backgroundColor: colors.neutral300,
-    height: verticalScale(135),
-    width: verticalScale(135),
-    borderRadius: 200,
-    borderWidth: 1,
-    borderColor: colors.neutral500,
   },
 
   editIcon: {

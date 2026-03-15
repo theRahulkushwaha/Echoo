@@ -22,9 +22,9 @@ export interface UserProps {
   email: string;
   name: string;
   avatar?: string | null;
-  id?: string;
-  // Add any additional fields from the token payload as needed
+  id: string;
 }
+
 export interface UserDataProps {
   name: string;
   email: string;
@@ -36,8 +36,6 @@ export interface InputProps extends TextInputProps {
   containerStyle?: ViewStyle;
   inputStyle?: TextStyle;
   inputRef?: React.RefObject<TextInput>;
-  //   label?: string;
-  //   error?: string;
 }
 
 export interface DecodedTokenProps {
@@ -54,7 +52,7 @@ export type AuthContextProps = {
     email: string,
     password: string,
     name: string,
-    avatar?: string
+    avatar?: string,
   ) => Promise<void>;
   signOut: () => Promise<void>;
   updateToken: (token: string) => Promise<void>;
@@ -92,6 +90,7 @@ export type AvatarProps = {
   uri: string | null;
   style?: ViewStyle;
   isGroup?: boolean;
+  showOnline?: boolean; // ✅ added
 };
 
 export type HeaderProps = {
@@ -121,25 +120,29 @@ export type ConversationProps = {
   name?: string;
   lastMessage?: {
     _id: string;
-    content: string;
-    senderId: string;
-    type: "text" | "image" | "file";
-    attachment?: string;
+    text: string;
+    sender: {
+      _id: string;
+      name: string;
+    };
     createdAt: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
+  unreadCount?: number;
 };
 
 export type MessageProps = {
-  id: string;
+  _id: string;
+  conversationId: string;
   sender: {
-    id: string;
+    _id: string;
     name: string;
     avatar: string | null;
   };
-  content: string;
-  attachement?: string | null;
-  isMe?: boolean;
+  text: string;
+  image?: string | null;
+  seenBy: string[];
   createdAt: string;
+  updatedAt: string;
 };

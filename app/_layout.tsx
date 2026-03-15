@@ -1,27 +1,47 @@
 import { AuthProvider } from "@/contexts/authContext";
+import { SocketProvider } from "@/contexts/socketContext";
 import { Stack } from "expo-router";
-import React from "react";
-import { StyleSheet } from "react-native";
 
-const StackLayout = () => {
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="(main)/profileModal"
-        options={{ presentation: "modal" }}
-      />
-    </Stack>
-  );
-};
+const StackLayout = () => (
+  <Stack screenOptions={{ headerShown: false }}>
+    <Stack.Screen
+      name="(main)/profileModal"
+      options={{ presentation: "modal" }}
+    />
+    <Stack.Screen name="(main)/newChat" options={{ presentation: "modal" }} />
+    <Stack.Screen
+      name="(main)/createGroup"
+      options={{ presentation: "modal" }}
+    />
+    <Stack.Screen
+      name="(main)/chatRoom"
+      options={{ animation: "slide_from_right" }}
+    />
+    <Stack.Screen
+      name="(main)/chatInfo"
+      options={{ animation: "slide_from_right" }}
+    />
+    <Stack.Screen
+      name="(main)/settings"
+      options={{ animation: "slide_from_right" }}
+    />
+    <Stack.Screen
+      name="(main)/stories"
+      options={{ animation: "slide_from_right" }}
+    />
+    <Stack.Screen
+      name="(main)/callScreen"
+      options={{ presentation: "fullScreenModal" }}
+    />
+  </Stack>
+);
 
-const RootLayout = () => {
-  return (
-    <AuthProvider>
+const RootLayout = () => (
+  <AuthProvider>
+    <SocketProvider>
       <StackLayout />
-    </AuthProvider>
-  );
-};
+    </SocketProvider>
+  </AuthProvider>
+);
 
 export default RootLayout;
-
-const styles = StyleSheet.create({});

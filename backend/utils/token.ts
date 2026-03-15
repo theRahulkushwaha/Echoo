@@ -1,21 +1,19 @@
+import jwt from "jsonwebtoken";
 import type { UserProps } from "../types.js";
-import jwt from 'jsonwebtoken';
 
 export const genrateToken = (user: UserProps) => {
-    const payload ={
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar,
-        }
-    }
-
-    return jwt.sign(payload, process.env.JWT_SECRET as string, {
-        expiresIn: '30d',
-    } )
-}
-
+  const payload = {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+    },
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET as string, {
+    expiresIn: "30d",
+  });
+};
 
 // 30d for 30 days
 // 1m for 1 month
