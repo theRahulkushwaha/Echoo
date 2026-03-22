@@ -1,0 +1,30 @@
+// Terminal 1 — Start backend + MongoDB:
+
+cd C:\Users\thera\OneDrive\Documents\Projects\Echoo
+docker-compose up
+
+
+//Terminal 2 — Start frontend:
+cd C:\Users\thera\OneDrive\Documents\Projects\Echoo
+npx expo start --clear --host 192.168.1.5
+
+
+//To stop everything:
+# Press Ctrl+C in both terminals
+# Then stop Docker:
+docker-compose down
+
+
+
+
+
+-----------------------------------------------
+
+What you need to do every time you switch networks
+Step 1 — Find new IP:
+cmdipconfig
+Look for Wi-Fi → IPv4 Address — e.g. 192.168.2.10
+Step 2 — Update .env:
+envEXPO_PUBLIC_API_URL=http://192.168.2.10:3000
+Step 3 — Start Expo with new IP:
+bashnpx expo start --clear --host 192.168.2.10

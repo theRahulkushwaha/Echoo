@@ -5,7 +5,13 @@ import { io, Socket } from "socket.io-client";
 let socket: Socket | null = null;
 
 export async function connectSocket(): Promise<Socket> {
-  if (socket) return socket; // prevent multiple connections
+  if (socket?.connected) return socket;
+
+  // reset if disconnected
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 
   const token = await AsyncStorage.getItem("token");
 
@@ -13,25 +19,40 @@ export async function connectSocket(): Promise<Socket> {
     throw new Error("No token found. User not authenticated.");
   }
 
+  console.log("Connecting to socket:", API_URL);
+
   socket = io(API_URL, {
     auth: { token },
-    transports: ["websocket"], // important for React Native
+    transports: ["websocket"],
+    forceNew: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    timeout: 10000,
   });
 
   await new Promise<void>((resolve, reject) => {
+    // timeout after 10 seconds
+    const timer = setTimeout(() => {
+      reject(new Error("Socket connection timeout — check API_URL"));
+    }, 10000);
+
     socket?.on("connect", () => {
-      console.log("Socket connected:", socket?.id);
+      clearTimeout(timer);
+      console.log("✅ Socket connected:", socket?.id);
       resolve();
     });
 
     socket?.on("connect_error", (err) => {
-      console.log("Socket connection error:", err.message);
+      clearTimeout(timer);
+      console.log("❌ Socket connection error:", err.message);
+      console.log("API_URL is:", API_URL);
       reject(err);
     });
   });
 
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected");
+  socket.on("disconnect", (reason) => {
+    console.log("Socket disconnected:", reason);
   });
 
   return socket;
